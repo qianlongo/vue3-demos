@@ -1,21 +1,30 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+// console.log(require('../views/Home.vue'))
+const registerRoutes = () => {
+  const contextInfo = require.context('../views', true, /.vue$/)
+  const routes = contextInfo.keys().map((filePath) => {
+    // filePath 形如 ./Home.vue、./modifiers/capture.vue
+    // path我们希望是/home、/modifiers/capture
+    // 所以需要把开头的./和.vue都替换为空
+    const path = filePath.toLowerCase().replace(/^\.|\.vue/g, '')
+    // name的话将/home、/modifiers/capture转成小驼峰即可
+    // 把开头的/先替换掉，再把第一个/后的单词变成大写就可以了
+    const name = path.replace(/^\//, '').replace(/\/(\w)/, ($0, $1) => $1.toUpperCase())
 
-const routes = [
-  {
-    path: '/',
-    name: 'home',
-    component: HomeView
-  },
-  {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  }
-]
+    // 通过require去读取.vue文件内容
+    const component = require(`../views${filePath.replace(/^\./, '')}`).default
+
+    return {
+      path,
+      name,
+      component
+    }
+  })
+
+  return routes
+}
+
+const routes = registerRoutes()
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
