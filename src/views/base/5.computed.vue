@@ -16,5 +16,6 @@ const sum = computed(() => {
 setInterval(() => {
   a++
   b++
+  console.log(sum.value)
 }, 1000)
 </script>
